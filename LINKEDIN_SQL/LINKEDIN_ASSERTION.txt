@@ -1,0 +1,431 @@
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+create or replace TRIGGER Action_Assertion_For_Group AFTER INSERT OR UPDATE ON ACTION 
+FOR EACH ROW
+DECLARE group_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO group_count
+FROM  LINKEDIN_GROUP,COMMUNITY
+WHERE LINKEDIN_GROUP.CommunityId = COMMUNITY.CommunityId AND COMMUNITY.CreatorId = :new.CreatorId;
+IF group_count <> 0 THEN 
+   raise_application_error (-30000, 'ACTION owner can not be a GROUP');
+END IF; 
+END;
+
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+create or replace TRIGGER Action_Connection_For_Company AFTER INSERT OR UPDATE ON ACTION 
+FOR EACH ROW
+DECLARE page_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO page_count
+FROM  COMPANY,COMMUNITY
+WHERE COMPANY.CommunityId = COMMUNITY.CommunityId AND :new.CreatorId = COMMUNITY.CreatorId AND :new.ActionType = 'CONNECTION';
+IF page_count <> 0 THEN 
+   raise_application_error (-30001, 'CONNECTION owner can not be a COMPANY');
+END IF; 
+END;
+
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+create or replace TRIGGER Action_Follow_For_Company AFTER INSERT OR UPDATE ON ACTION 
+FOR EACH ROW
+DECLARE page_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO page_count
+FROM  COMPANY,COMMUNITY
+WHERE COMPANY.CommunityId = COMMUNITY.CommunityId AND :new.CreatorId = COMMUNITY.CreatorId AND :new.ActionType = 'FOLLOW';
+IF page_count <> 0 THEN 
+   raise_application_error (-30002, 'FOLLOW owner can not be a COMPANY');
+END IF; 
+END;
+
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+create or replace TRIGGER Action_Join_For_Company AFTER INSERT OR UPDATE ON ACTION 
+FOR EACH ROW
+DECLARE page_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO page_count
+FROM  COMPANY,COMMUNITY
+WHERE COMPANY.CommunityId = COMMUNITY.CommunityId AND :new.CreatorId = COMMUNITY.CreatorId AND :new.ActionType = 'JOIN';
+IF page_count <> 0 THEN 
+   raise_application_error (-30003, 'JOIN owner can not be a COMPANY');
+END IF; 
+END;
+
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+create or replace TRIGGER ADS_Owner_COMPANY AFTER INSERT OR UPDATE ON ADS
+FOR EACH ROW
+DECLARE group_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO group_count
+FROM  USER_PROFILE,COMPANY,COMMUNITY
+WHERE :NEW.CreatorId = COMMUNITY.CreatorId AND COMPANY.CommunityId = community.communityid;
+IF group_count <> 0 THEN 
+   raise_application_error (-30004, 'ADS owner can not be a COMPANY');
+END IF; 
+
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+create or replace TRIGGER Company_Settings_Assertion_For_Page AFTER INSERT OR UPDATE ON COMPANY_SETTINGS 
+FOR EACH ROW
+DECLARE company_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO company_count
+FROM  COMPANY,COMMUNITY
+WHERE COMPANY.CommunityId = COMMUNITY.CommunityId AND COMMUNITY.CreatorId = :new.CreatorId;
+IF company_count = 0 THEN 
+   raise_application_error (-30005, 'COMPANY settings owner must be a COMPANY');
+END IF; 
+END;
+
+
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+create or replace TRIGGER Effected_Action_Comment_Assertion_For_Creator AFTER INSERT OR UPDATE ON ACTION 
+FOR EACH ROW
+DECLARE community_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO community_count
+FROM CREATOR
+WHERE :new.ActionType = 'COMMENT' AND :new.DestinationId = CREATOR.EffectedId ;
+IF community_count <> 0 THEN 
+   raise_application_error (-30006, 'Creator can not be affected with Comment action');
+END IF; 
+END;
+END;
+
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+
+create or replace TRIGGER Effected_Action_Connection_Assertion_For_Comment AFTER INSERT OR UPDATE ON ACTION 
+FOR EACH ROW
+DECLARE community_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO community_count
+FROM CREATOR_COMMENT
+WHERE :new.ActionType = 'CONNECTION' AND :new.DestinationId = CREATOR_COMMENT.EffectedId ;
+IF community_count <> 0 THEN 
+   raise_application_error (-30007, 'Comment can not be affected with Connection action');
+END IF; 
+END;
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+
+create or replace TRIGGER Effected_Action_Connection_Assertion_For_Community AFTER INSERT OR UPDATE ON ACTION 
+FOR EACH ROW
+DECLARE community_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO community_count
+FROM  COMMUNITY,CREATOR
+WHERE :new.ActionType = 'CONNECTION' AND COMMUNITY.CreatorId = :new.CreatorId AND :new.DestinationId = CREATOR.EffectedId;
+IF community_count <> 0 THEN 
+   raise_application_error (-30008, 'COMMUNITY can not be affected with CONNECTION action');
+END IF; 
+END;
+
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+
+create or replace TRIGGER Effected_Action_Connection_Assertion_For_Post AFTER INSERT OR UPDATE ON ACTION 
+FOR EACH ROW
+DECLARE community_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO community_count
+FROM POST
+WHERE :new.ActionType = 'CONNECTION' AND :new.DestinationId = POST.EffectedId ;
+IF community_count <> 0 THEN 
+   raise_application_error (-30009, 'Post can not be affected with Connection action');
+END IF; 
+END;
+
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+create or replace TRIGGER Effected_Action_Follow_Assertion_For_Comment AFTER INSERT OR UPDATE ON ACTION 
+FOR EACH ROW
+DECLARE community_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO community_count
+FROM CREATOR_COMMENT
+WHERE :new.ActionType = 'FOLLOW' AND :new.DestinationId = CREATOR_COMMENT.EffectedId ;
+IF community_count <> 0 THEN 
+   raise_application_error (-30010, 'Comment can not be affected with Follow action');
+END IF; 
+END;
+
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+create or replace TRIGGER Effected_Action_Follow_Assertion_For_Group AFTER INSERT OR UPDATE ON ACTION 
+FOR EACH ROW
+DECLARE community_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO community_count
+FROM  COMMUNITY,CREATOR,LINKEDIN_GROUP
+WHERE :new.ActionType = 'FOLLOW' AND :new.DestinationId = CREATOR.EffectedId AND LINKEDIN_GROUP.CommunityId = community.communityid;
+IF community_count <> 0 THEN 
+   raise_application_error (-30011, 'GROUP can not be affected with FOLLOW action');
+END IF; 
+END;
+
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+
+create or replace TRIGGER Effected_Action_Follow_Assertion_For_Post AFTER INSERT OR UPDATE ON ACTION 
+FOR EACH ROW
+DECLARE community_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO community_count
+FROM POST
+WHERE :new.ActionType = 'FOLLOW' AND :new.DestinationId = POST.EffectedId ;
+IF community_count <> 0 THEN 
+   raise_application_error (-30012, 'Post can not be affected with Follow action');
+END IF; 
+END;
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+
+create or replace TRIGGER Effected_Action_Join_Assertion_For_Comment AFTER INSERT OR UPDATE ON ACTION 
+FOR EACH ROW
+DECLARE community_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO community_count
+FROM CREATOR_COMMENT
+WHERE :new.ActionType = 'JOIN' AND :new.DestinationId = CREATOR_COMMENT.EffectedId ;
+IF community_count <> 0 THEN 
+   raise_application_error (-30013, 'Comment can not be affected with Join action');
+END IF; 
+END;
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+create or replace TRIGGER Effected_Action_Join_Assertion_For_Company AFTER INSERT OR UPDATE ON ACTION 
+FOR EACH ROW
+DECLARE community_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO community_count
+FROM  COMMUNITY,CREATOR,COMPANY
+WHERE :new.ActionType = 'FOLLOW' AND :new.DestinationId = CREATOR.EffectedId AND COMPANY.CommunityId = community.communityid;
+IF community_count <> 0 THEN 
+   raise_application_error (-30014, 'Company can not be affected with JOIN action');
+END IF; 
+END;
+
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+
+create or replace TRIGGER Effected_Action_Join_Assertion_For_Post AFTER INSERT OR UPDATE ON ACTION 
+FOR EACH ROW
+DECLARE community_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO community_count
+FROM POST
+WHERE :new.ActionType = 'JOIN' AND :new.DestinationId = POST.EffectedId ;
+IF community_count <> 0 THEN 
+   raise_application_error (-30015, 'Post can not be affected with Join action');
+END IF; 
+END;
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+
+create or replace TRIGGER Effected_Action_Join_Assertion_For_User AFTER INSERT OR UPDATE ON ACTION 
+FOR EACH ROW
+DECLARE page_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO page_count
+FROM  LINKEDIN_USER,CREATOR
+WHERE :new.ActionType = 'JOIN' AND LINKEDIN_USER.CreatorId = :new.CreatorId AND CREATOR.EffectedId = :new.DestinationId;
+IF page_count <> 0 THEN 
+   raise_application_error (-30016, 'Effected_Action_Join_Assertion_For_User');
+END IF; 
+END;
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+
+create or replace TRIGGER Effected_Action_Like_Assertion_For_Creator AFTER INSERT OR UPDATE ON ACTION 
+FOR EACH ROW
+DECLARE community_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO community_count
+FROM CREATOR
+WHERE :new.ActionType = 'LIKE' AND :new.DestinationId = CREATOR.EffectedId ;
+IF community_count <> 0 THEN 
+   raise_application_error (-30017, 'Creator can not be affected with Like action');
+END IF; 
+END;
+
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+create or replace TRIGGER Effected_Action_Message_Assertion_For_Comment AFTER INSERT OR UPDATE ON ACTION 
+FOR EACH ROW
+DECLARE community_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO community_count
+FROM CREATOR_COMMENT
+WHERE :new.ActionType = 'MESSAGE' AND :new.DestinationId = CREATOR_COMMENT.EffectedId ;
+IF community_count <> 0 THEN 
+   raise_application_error (-30018, 'Comment can not be affected with Message action');
+END IF; 
+END;
+
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+create or replace TRIGGER Effected_Action_Message_Assertion_For_Community AFTER INSERT OR UPDATE ON ACTION 
+FOR EACH ROW
+DECLARE community_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO community_count
+FROM  COMMUNITY,CREATOR
+WHERE :new.ActionType = 'MESSAGE' AND COMMUNITY.CreatorId = :new.CreatorId AND :new.DestinationId = CREATOR.EffectedId;
+IF community_count <> 0 THEN 
+   raise_application_error (-30019, 'COMMUNITY can not be affected with MESSAGE action');
+END IF; 
+END;
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+create or replace TRIGGER Effected_Action_Message_Assertion_For_Post AFTER INSERT OR UPDATE ON ACTION 
+FOR EACH ROW
+DECLARE community_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO community_count
+FROM POST
+WHERE :new.ActionType = 'MESSAGE' AND :new.DestinationId = POST.EffectedId ;
+IF community_count <> 0 THEN 
+   raise_application_error (-30020, 'Post can not be affected with Message action');
+END IF; 
+END;
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+create or replace TRIGGER Effected_Action_Post_Assertion_For_Comment AFTER INSERT OR UPDATE ON ACTION 
+FOR EACH ROW
+DECLARE community_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO community_count
+FROM CREATOR_COMMENT
+WHERE :new.ActionType = 'POST' AND :new.DestinationId = CREATOR_COMMENT.EffectedId ;
+IF community_count <> 0 THEN 
+   raise_application_error (-30021, 'Comment can not be affected with Post action');
+END IF; 
+END;
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+create or replace TRIGGER Effected_Action_Post_Assertion_For_Post AFTER INSERT OR UPDATE ON ACTION 
+FOR EACH ROW
+DECLARE community_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO community_count
+FROM POST
+WHERE :new.ActionType = 'POST' AND :new.DestinationId = POST.EffectedId ;
+IF community_count <> 0 THEN 
+   raise_application_error (-30022, 'Post can not be affected with Post action');
+END IF; 
+END;
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+create or replace TRIGGER Effected_Action_Search_Assertion_For_Comment AFTER INSERT OR UPDATE ON ACTION 
+FOR EACH ROW
+DECLARE community_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO community_count
+FROM CREATOR_COMMENT
+WHERE :new.ActionType = 'SEARCH' AND :new.DestinationId = CREATOR_COMMENT.EffectedId ;
+IF community_count <> 0 THEN 
+   raise_application_error (-30023, 'Comment can not be affected with Search action');
+END IF; 
+END;
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+create or replace TRIGGER Effected_Action_Search_Assertion_For_Post AFTER INSERT OR UPDATE ON ACTION 
+FOR EACH ROW
+DECLARE community_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO community_count
+FROM POST
+WHERE :new.ActionType = 'SEARCH' AND :new.DestinationId = POST.EffectedId ;
+IF community_count <> 0 THEN 
+   raise_application_error (-30024, 'Post can not be affected with Search action');
+END IF; 
+END;
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+create or replace TRIGGER Effected_Action_View_Assertion_For_Comment AFTER INSERT OR UPDATE ON ACTION 
+FOR EACH ROW
+DECLARE community_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO community_count
+FROM CREATOR_COMMENT
+WHERE :new.ActionType = 'VIEW' AND :new.DestinationId = CREATOR_COMMENT.EffectedId ;
+IF community_count <> 0 THEN 
+   raise_application_error (-30025, 'Comment can not be affected with View action');
+END IF; 
+END;
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+create or replace TRIGGER Effected_Action_View_Assertion_For_Post AFTER INSERT OR UPDATE ON ACTION 
+FOR EACH ROW
+DECLARE community_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO community_count
+FROM POST
+WHERE :new.ActionType = 'VIEW' AND :new.DestinationId = POST.EffectedId ;
+IF community_count <> 0 THEN 
+   raise_application_error (-30026, 'Post can not be affected with View action');
+END IF; 
+END;
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+create or replace TRIGGER Group_Settings_Assertion_For_Group AFTER INSERT OR UPDATE ON GROUP_SETTINGS 
+FOR EACH ROW
+DECLARE group_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO group_count
+FROM  LINKEDIN_GROUP,COMMUNITY
+WHERE LINKEDIN_GROUP.CommunityId = COMMUNITY.CommunityId AND COMMUNITY.CreatorId = :new.CreatorId;
+IF group_count = 0 THEN 
+   raise_application_error (-30027, 'GROUP settings owner must be a GROUP');
+END IF; 
+END;
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+create or replace TRIGGER JOB_ANNOUNCEMENT_Owner_COMPANY AFTER INSERT OR UPDATE ON JOB_ANNOUNCEMENT
+FOR EACH ROW
+DECLARE group_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO group_count
+FROM  USER_PROFILE,COMPANY,COMMUNITY
+WHERE :NEW.CreatorId = COMMUNITY.CreatorId AND COMPANY.CommunityId = community.communityid;
+IF group_count <> 0 THEN 
+   raise_application_error (-30028, 'JOB owner can not be a COMPANY');
+END IF; 
+END;
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+create or replace TRIGGER Profile_Assertion_For_Company AFTER INSERT OR UPDATE ON COMPANY_PROFILE 
+FOR EACH ROW
+DECLARE user_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO user_count
+FROM   COMPANY,CREATOR_PROFILE,COMMUNITY
+WHERE  :new.ProfileId = CREATOR_PROFILE.ProfileId AND COMPANY.CommunityId = COMMUNITY.CommunityId;
+IF user_count = 0 THEN 
+   raise_application_error (-30029, 'COMPANY_Profile owner must be a company');
+END IF; 
+END;
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+create or replace TRIGGER Profile_Assertion_For_Group AFTER INSERT OR UPDATE ON GROUP_PROFILE 
+FOR EACH ROW
+DECLARE user_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO user_count
+FROM   LINKEDIN_GROUP,CREATOR_PROFILE,COMMUNITY
+WHERE  :new.ProfileId = CREATOR_PROFILE.ProfileId AND LINKEDIN_GROUP.CommunityId = COMMUNITY.CommunityId;
+IF user_count = 0 THEN 
+   raise_application_error (-30030, 'GROUP_Profile owner must be a group');
+END IF; 
+END;
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+create or replace TRIGGER Profile_Assertion_For_User AFTER INSERT OR UPDATE ON USER_PROFILE 
+FOR EACH ROW
+DECLARE user_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO user_count
+FROM   LINKEDIN_USER,CREATOR_PROFILE
+WHERE  :new.ProfileId = CREATOR_PROFILE.ProfileId AND CREATOR_PROFILE.CreatorId = LINKEDIN_USER.CreatorId;
+IF user_count = 0 THEN 
+   raise_application_error (-30031, 'USER_Profile owner must be a user');
+END IF; 
+END;
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+create or replace TRIGGER Profile_Info_Owner_UserProfile AFTER INSERT OR UPDATE ON PROFILE_INFO
+FOR EACH ROW
+DECLARE group_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO group_count
+FROM  USER_PROFILE
+WHERE :NEW.ProfileId = USER_PROFILE.ProfileId;
+IF group_count <> 0 THEN 
+   raise_application_error (-30032, 'ACTION owner can not be a GROUP');
+END IF; 
+END;
+/* COMMUNITY can not be affected with FRIENDSHIP action*/
+create or replace TRIGGER User_Settings_Assertion_For_User AFTER INSERT OR UPDATE ON USER_SETTINGS 
+FOR EACH ROW
+DECLARE user_count INTEGER := 0; 
+BEGIN
+SELECT count (*) INTO user_count
+FROM   LINKEDIN_USER
+WHERE  :new.CreatorId = CreatorId;
+IF user_count <> 0 THEN 
+   raise_application_error (-30033, 'User settings owner must be a user');
+END IF; 
+END;
